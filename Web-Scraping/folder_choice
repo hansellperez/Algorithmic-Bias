@@ -1,0 +1,44 @@
+import requests 
+from bs4 import BeautifulSoup 
+import shutil
+import os
+import re
+    
+def getdata(url):
+    folder_name = input('File Name:- ')
+    if not os.path.exists(folder_name):
+        os.makedirs(folder_name) 
+    os.chdir(f'{folder_name}')
+    r = requests.get(url) 
+    return r.text 
+
+
+htmldata = getdata("https://en.wikipedia.org/wiki/Cheese") 
+soup = BeautifulSoup(htmldata, 'html.parser') 
+for item in soup.find_all('img'):
+    print(item['src'])
+
+# user will need to define their own desired destination folder
+#os.chdir(f'{folder_name}')
+
+urls = ['https://upload.wikimedia.org/wikipedia/commons/thumb/a/a8/Cheese_platter.jpg/520px-Cheese_platter.jpg'
+       ,'https://upload.wikimedia.org/wikipedia/commons/thumb/5/5f/Ricotta_affumicata_della_sila.jpg/440px-Ricotta_affumicata_della_sila.jpg'
+       ,'https://upload.wikimedia.org/wikipedia/commons/thumb/4/48/Formaggi.JPG/440px-Formaggi.JPG']
+for x in urls:
+    filename = x.split("/")[-1]
+
+# Open the url image, set stream to True, this will return the stream content.
+    r = requests.get(x, stream = True)
+
+# Check if the image was retrieved successfully
+    if r.status_code == 200:
+    # Set decode_content value to True, otherwise the downloaded image file's size will be zero.
+        r.raw.decode_content = True
+    
+    # Open a local file with wb ( write binary ) permission.
+        with open(filename,'wb') as f:
+            shutil.copyfileobj(r.raw, f)
+
+        print('Image sucessfully Downloaded: ',filename)
+    else:
+        print('Image Couldn\'t be retreived')
